@@ -9,9 +9,10 @@ struct Tile
     gold : f64,
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Debug)]
 struct Producer
 {
+    name : String,
     population : f64,
     gold: f64,
 
@@ -26,13 +27,15 @@ fn main() {
 
     println!("TYPE;ID;A;B;C;D;E;F;G");
 
-    let mut producers = [Producer {population : 20_f64, gold: 1000_f64, products: [0_f64, 0_f64], products_ratio: [0.0, 0.0], product_usage: [1.0, 1.0], happiness: 0.1}; 5];
-    let producer_count = producers.len();
+    let mut producers : Vec<Producer> = vec!();
 
-    producers[1].products_ratio[0] = 1.1;
-    producers[2].products_ratio[1] = 1.05;
-    producers[3].products_ratio[0] = 1.05;
-    producers[4].products_ratio[1] = 1.015;
+    producers.push(Producer {name:"owners".to_string(),     population : 20_f64, gold: 1000_f64, products: [0_f64, 0_f64], products_ratio: [0.0, 0.0], product_usage: [1.0, 1.0], happiness: 0.0});
+    producers.push(Producer {name:"food high".to_string(),  population : 20_f64, gold: 1000_f64, products: [0_f64, 0_f64], products_ratio: [1.1, 0.0], product_usage: [1.0, 1.0], happiness: 0.0});
+    producers.push(Producer {name:"food low".to_string(),   population : 20_f64, gold: 1000_f64, products: [0_f64, 0_f64], products_ratio: [1.05, 0.0], product_usage: [1.0, 1.0], happiness: 0.0});
+    producers.push(Producer {name:"goods high".to_string(), population : 20_f64, gold: 1000_f64, products: [0_f64, 0_f64], products_ratio: [0.0, 1.05], product_usage: [1.0, 1.0], happiness: 0.0});
+    producers.push(Producer {name:"goods low".to_string(),  population : 20_f64, gold: 1000_f64, products: [0_f64, 0_f64], products_ratio: [0.0, 1.015], product_usage: [1.0, 1.0], happiness: 0.0});
+
+    let producer_count = producers.len();
 
     let mut prices : [f64; 2] = [1_f64, 1_f64];
 
@@ -40,7 +43,10 @@ fn main() {
     writeln!(&mut prices_output, "Step;Price 1;Price 2").unwrap();
 
     let mut population_output : File = File::create("population.csv").unwrap();
-    writeln!(&mut population_output, "Step;").unwrap();
+    {
+        let producers_names = producers.iter().map(|prod| prod.name.to_string()).collect::<Vec<_>>().join(";");
+        writeln!(&mut population_output, "Step;{0}", producers_names).unwrap();
+    }
 
     for step_id in 0..3000
     {
