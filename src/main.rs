@@ -1,3 +1,6 @@
+use std::fs::File;
+use std::io::Write;
+
 #[derive(Copy, Clone, Debug)]
 struct Tile
 {
@@ -33,7 +36,13 @@ fn main() {
 
     let mut prices : [f64; 2] = [1_f64, 1_f64];
 
-    for _ in 0..200
+    let mut prices_output : File = File::create("prices.csv").unwrap();
+    writeln!(&mut prices_output, "Step;Price 1;Price 2").unwrap();
+
+    let mut population_output : File = File::create("population.csv").unwrap();
+    writeln!(&mut population_output, "Step;").unwrap();
+
+    for step_id in 0..3000
     {
         let mut total_product = [0_f64, 0_f64];
         let mut total_gold = 0_f64;
@@ -204,6 +213,12 @@ fn main() {
                     println!("ERROR; gold is negative:{0:.10}", prod.gold)
                 }
             }
+        }
+
+        {
+            let producers_population = producers.iter().map(|prod| prod.population.to_string()).collect::<Vec<_>>().join(";");
+            writeln!(&mut population_output, "{0};{1}", step_id, producers_population).unwrap();
+            writeln!(&mut prices_output, "{0};{1:.3};{2:.3}", step_id, prices[0], prices[1]).unwrap();
         }
     }
 }
