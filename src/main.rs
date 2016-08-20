@@ -19,8 +19,24 @@ struct Producer
     happiness : f64,
 
     products : [f64; 2], // 0 food, 1 goods
-    products_ratio : [f64; 2],
-    product_usage: [f64; 2]
+    product_usage: [f64; 2],
+
+    production : Production,
+}
+
+#[derive(Debug)]
+enum Production {
+    None,
+    Relative {product : usize, ratio : f64},
+}
+
+impl Production {
+    fn produce(&self, population: f64) -> (usize, f64) {
+        match self {
+            &Production::None => (0, 0.0),
+            &Production::Relative { product, ratio } => (product, population * ratio),
+        }
+    }
 }
 
 fn main() {
@@ -29,11 +45,11 @@ fn main() {
 
     let mut producers : Vec<Producer> = vec!();
 
-    producers.push(Producer {name:"owners".to_string(),     population : 20_f64, gold: 1000_f64, products: [0_f64, 0_f64], products_ratio: [0.0, 0.0], product_usage: [1.0, 1.0], happiness: 0.0});
-    producers.push(Producer {name:"food high".to_string(),  population : 20_f64, gold: 1000_f64, products: [0_f64, 0_f64], products_ratio: [1.1, 0.0], product_usage: [1.0, 1.0], happiness: 0.0});
-    producers.push(Producer {name:"food low".to_string(),   population : 20_f64, gold: 1000_f64, products: [0_f64, 0_f64], products_ratio: [1.05, 0.0], product_usage: [1.0, 1.0], happiness: 0.0});
-    producers.push(Producer {name:"goods high".to_string(), population : 20_f64, gold: 1000_f64, products: [0_f64, 0_f64], products_ratio: [0.0, 1.05], product_usage: [1.0, 1.0], happiness: 0.0});
-    producers.push(Producer {name:"goods low".to_string(),  population : 20_f64, gold: 1000_f64, products: [0_f64, 0_f64], products_ratio: [0.0, 1.015], product_usage: [1.0, 1.0], happiness: 0.0});
+    producers.push(Producer {name:"owners".to_string(),     population : 20_f64, gold: 1000_f64, products: [0_f64, 0_f64], production: Production::None, product_usage: [1.0, 1.0], happiness: 0.0});
+    producers.push(Producer {name:"food high".to_string(),  population : 20_f64, gold: 1000_f64, products: [0_f64, 0_f64], production: Production::Relative { product : 0, ratio : 1.1 }, product_usage: [1.0, 1.0], happiness: 0.0});
+    producers.push(Producer {name:"food low".to_string(),   population : 20_f64, gold: 1000_f64, products: [0_f64, 0_f64], production: Production::Relative { product : 0, ratio : 1.05 }, product_usage: [1.0, 1.0], happiness: 0.0});
+    producers.push(Producer {name:"goods high".to_string(), population : 20_f64, gold: 1000_f64, products: [0_f64, 0_f64], production: Production::Relative { product : 1, ratio : 1.1 }, product_usage: [1.0, 1.0], happiness: 0.0});
+    producers.push(Producer {name:"goods low".to_string(),  population : 20_f64, gold: 1000_f64, products: [0_f64, 0_f64], production: Production::Relative { product : 1, ratio : 1.05 }, product_usage: [1.0, 1.0], happiness: 0.0});
 
     let producer_count = producers.len();
 
@@ -48,7 +64,7 @@ fn main() {
         writeln!(&mut population_output, "Step;{0}", producers_names).unwrap();
     }
 
-    for step_id in 0..3000
+    for step_id in 0..500
     {
         let mut total_product = [0_f64, 0_f64];
         let mut total_gold = 0_f64;
@@ -57,17 +73,8 @@ fn main() {
         for x in 0..producer_count {
             let mut producer = &mut producers[x];
 
-            //let n1 = 1.1;
-            //let produced_food = ((( producer.population + 1.0_f64).powf(1.0-n1) - 1.0)/(1.0-n1)) * producer.products_ratio[0];
-            let produced_food = producer.population * producer.products_ratio[0];
-            producer.products[0] += produced_food;
-
-            //let n1 = 1.1;
-            //let produced_goods = ((( producer.population + 1.0_f64).powf(1.0-n1) - 1.0)/(1.0-n1)) * producer.products_ratio[1];
-            let produced_goods = producer.population * producer.products_ratio[1];
-            producer.products[1] += produced_goods;
-
-            println!("PRODUCERS_PRODUCE;{3};{0:.3};{1:.3};{2:.3};{4:.3};{5:.3};{6:.3}", producer.population, producer.products[0], producer.products[1], x, producer.gold, produced_food, produced_goods);
+            let (item, amount) = producer.production.produce(producer.population);
+            producer.products[item] += amount;
         }
 
         for _ in 0..4 {
