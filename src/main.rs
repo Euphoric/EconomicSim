@@ -143,8 +143,8 @@ fn main() {
 
                 let sold_ratio = total_bough / offered_resource;
 
-                if sold_ratio > 1.0 {
-                    println!("ERROR; sold more than is available");
+                if sold_ratio > 1.000001 {
+                    println!("ERROR; sold more than is available;{0};{1}", offered_resource, total_bough);
                 }
 
                 for seller in &mut sellers {
