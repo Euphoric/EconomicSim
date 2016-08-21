@@ -51,8 +51,6 @@ fn calc_diminish(product: usize, zero:f64, at_one:f64) -> Production {
 
 fn main() {
 
-    println!("TYPE;ID;A;B;C;D;E;F;G");
-
     let mut producers : Vec<Producer> = vec!();
 
     producers.push(Producer {name:"owners".to_string(),     population : 20_f64, gold: 1000_f64, products: [0_f64, 0_f64], production: Production::None, product_usage: [1.0, 1.0], happiness: 0.0});
@@ -156,17 +154,12 @@ fn main() {
                     seller.products[product_id] -= seller_sold;
                     seller.gold += seller_sold * price;
                 }
-
-                println!("TRADING;{0:.10};{1:.10};{2:.10};{3:.10};{4:.10};{5:.10};{6:.10}", product_id, price, wanted_resources, offered_gold, offered_resource, wanted_gold, total_bough);
             }
         }
-        println!("PRICES;0;{0:.10};{1:.10};", prices[0], prices[1]);
 
         // consume goods
         for x in 0..producer_count {
             let mut producer = &mut producers[x];
-
-            println!("PRODUCERS_CONSUME_BEFORE;{3};{0:.3};{1:.3};{2:.3};{4:.3};{5:.3}", producer.population, producer.products[0], producer.products[1], x, producer.gold, producer.happiness);
 
             let needed_food = producer.population * producer.product_usage[0];
             let eaten_food = producer.products[0].min(needed_food);
@@ -184,8 +177,6 @@ fn main() {
             if x == 0 {
                 producer.happiness *= 1.01;
             }
-
-            println!("PRODUCERS_CONSUME_AFTER;{3};{0:.3};{1:.3};{2:.3};{4:.3};{5:.3};{6:.3};{7:.3}", producer.population, producer.products[0], producer.products[1], x, producer.gold, producer.happiness, eaten_food, used_goods);
         }
 
         // move people between producers
@@ -204,8 +195,6 @@ fn main() {
 
                     producers_vec[from].population -= move_people;
                     producers_vec[to].population += move_people;
-
-                    println!("POPULATION_MOVE;{0:.3};{1:.3};{2:.3};{3:.3};{4:.3};{5:.3}", from, to, producers_vec[from].population, producers_vec[to].population, target_population, move_people);
                 }
             }
         }
