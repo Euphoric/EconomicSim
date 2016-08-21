@@ -28,6 +28,7 @@ struct Producer
 enum Production {
     None,
     Relative {product : usize, ratio : f64},
+    Dimmishing {product : usize, multiple : f64, dimminish : f64}
 }
 
 impl Production {
@@ -35,8 +36,17 @@ impl Production {
         match self {
             &Production::None => (0, 0.0),
             &Production::Relative { product, ratio } => (product, population * ratio),
+            &Production::Dimmishing { product, multiple, dimminish } => (product, ((population+1.0).powf(1.0-dimminish) - 1.0)/(1.0-dimminish) * multiple),
         }
     }
+}
+
+// calculates diminishing return coeficient so that 0 population produces zero and at_one population produces 1
+fn calc_diminish(product: usize, zero:f64, at_one:f64) -> Production {
+    let mult = zero;
+    let dimm = zero.log10()/(at_one + 1.0).log10();
+
+    Production::Dimmishing {product:product, multiple:mult, dimminish : dimm }
 }
 
 fn main() {
@@ -46,10 +56,10 @@ fn main() {
     let mut producers : Vec<Producer> = vec!();
 
     producers.push(Producer {name:"owners".to_string(),     population : 20_f64, gold: 1000_f64, products: [0_f64, 0_f64], production: Production::None, product_usage: [1.0, 1.0], happiness: 0.0});
-    producers.push(Producer {name:"food high".to_string(),  population : 20_f64, gold: 1000_f64, products: [0_f64, 0_f64], production: Production::Relative { product : 0, ratio : 1.1 }, product_usage: [1.0, 1.0], happiness: 0.0});
-    producers.push(Producer {name:"food low".to_string(),   population : 20_f64, gold: 1000_f64, products: [0_f64, 0_f64], production: Production::Relative { product : 0, ratio : 1.05 }, product_usage: [1.0, 1.0], happiness: 0.0});
-    producers.push(Producer {name:"goods high".to_string(), population : 20_f64, gold: 1000_f64, products: [0_f64, 0_f64], production: Production::Relative { product : 1, ratio : 1.1 }, product_usage: [1.0, 1.0], happiness: 0.0});
-    producers.push(Producer {name:"goods low".to_string(),  population : 20_f64, gold: 1000_f64, products: [0_f64, 0_f64], production: Production::Relative { product : 1, ratio : 1.05 }, product_usage: [1.0, 1.0], happiness: 0.0});
+    producers.push(Producer {name:"food high".to_string(),  population : 20_f64, gold: 1000_f64, products: [0_f64, 0_f64], production: calc_diminish(0, 2.0, 30.0), product_usage: [1.0, 1.0], happiness: 0.0});
+    producers.push(Producer {name:"food low".to_string(),   population : 20_f64, gold: 1000_f64, products: [0_f64, 0_f64], production: calc_diminish(0, 1.5, 60.0), product_usage: [1.0, 1.0], happiness: 0.0});
+    producers.push(Producer {name:"goods high".to_string(), population : 20_f64, gold: 1000_f64, products: [0_f64, 0_f64], production: calc_diminish(1, 3.0, 10.0), product_usage: [1.0, 1.0], happiness: 0.0});
+    producers.push(Producer {name:"goods low".to_string(),  population : 20_f64, gold: 1000_f64, products: [0_f64, 0_f64], production: calc_diminish(1, 1.1, 20.0), product_usage: [1.0, 1.0], happiness: 0.0});
 
     let producer_count = producers.len();
 
